@@ -7,7 +7,6 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 //Configuracion de variables de entorno
 dotenv.config();
 
-//errores no capturados
 process.on('uncaughtException', (error) =>{
     console.log(error);
     process.exit(1);

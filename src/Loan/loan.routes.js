@@ -13,7 +13,6 @@ import {
 const router = Router();
 
 
-
 router.get('/my-loans',
     validateJWT,
     hasRole('USER'),

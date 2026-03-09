@@ -1,7 +1,6 @@
 
 import Account from "./account.model.js";
 
-
 // Obtener todas las cuentas (activas)
 export const getAccounts = async (req, res) => {
     try {

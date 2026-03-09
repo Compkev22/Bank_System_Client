@@ -5,7 +5,6 @@ import pkg from 'multer-storage-cloudinary';
 import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
 
-// Solución para Node v24: Detecta el constructor de forma automática
 const CloudinaryStorage = pkg.CloudinaryStorage || (pkg.default && pkg.default.CloudinaryStorage) || pkg;
  
 dotenv.config();

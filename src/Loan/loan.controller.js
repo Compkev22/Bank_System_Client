@@ -22,7 +22,6 @@ export const getMyLoans = async (req, res) => {
 
 
 
-
 // Obtener préstamo por ID
 export const getLoanById = async (req, res) => {
     try {
@@ -33,7 +32,6 @@ export const getLoanById = async (req, res) => {
         if (!loan)
             return res.status(404).json({ success: false, message: 'Préstamo no encontrado' });
 
-        // Solo admin o dueño
         if (
             loan.borrower._id.toString() !== req.user._id.toString() &&
             req.user.UserRol !== 'ADMIN'

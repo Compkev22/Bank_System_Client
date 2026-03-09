@@ -25,7 +25,7 @@ const productSchema = new Schema({
     },
     stock: {
         type: Number,
-        default: 0 // Si es un servicio, puede quedarse en 0. Si es un producto físico, el admin le pondrá cantidad.
+        default: 0 
     },
     isActive: {
         type: Boolean,

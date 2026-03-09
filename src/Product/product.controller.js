@@ -9,7 +9,7 @@ export const getProducts = async (req, res) => {
         
         // Solo mostramos los que están activos
         const filter = { isActive: true };
-        if (type) filter.type = type.toUpperCase(); // Por si quieren filtrar solo SERVICIOS o PRODUCTOS
+        if (type) filter.type = type.toUpperCase(); 
 
         const products = await Product.find(filter)
             .limit(parseInt(limit))

@@ -94,15 +94,9 @@ export const updateCard = async (req, res) => {
         // Si viene una nueva imagen, borramos la anterior de Cloudinary
         if (req.file) {
             if (currentCard.image && !currentCard.image.includes('default_card')) {
-                // Extraemos el public_id de la URL antigua para borrarla
-                // Nota: Esto asume que guardaste la URL completa. 
-                // Si guardaste solo el filename, usa currentCard.image directamente.
                 const nameArr = currentCard.image.split('/');
                 const name = nameArr[nameArr.length - 1];
                 const [publicId] = name.split('.');
-                
-                // Intentamos borrar usando el folder configurado
-                // Ajusta 'bank_system/cards/' según tu carpeta en Cloudinary
                 await cloudinary.uploader.destroy(`bank_system/cards/${publicId}`);
             }
             data.image = req.file.path;

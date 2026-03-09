@@ -34,7 +34,7 @@ export const createLoanApplication = async (req, res) => {
 };
 
 
-// Editar solicitud (solo si está PENDING y es del usuario)
+// Editar solicitud 
 export const updateLoanApplication = async (req, res) => {
     try {
         const { id } = req.params;
@@ -66,7 +66,7 @@ export const updateLoanApplication = async (req, res) => {
 };
 
 
-// Cancelar solicitud (solo si está PENDING y es del usuario)
+// Cancelar solicitud 
 export const cancelLoanApplication = async (req, res) => {
     try {
         const { id } = req.params;

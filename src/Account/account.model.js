@@ -45,7 +45,6 @@ const accountSchema = Schema({
     versionKey: false
 });
 
-// Índice para optimizar búsquedas por número de cuenta
-//accountSchema.index({ accountNumber: 1 });
+
 
 export default model('Account', accountSchema);

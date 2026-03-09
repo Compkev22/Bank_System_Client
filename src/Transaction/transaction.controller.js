@@ -6,7 +6,7 @@ import Card from '../Card/card.model.js';
 import Loan from '../Loan/loan.model.js';
 import { convertCurrency } from '../Exchange/exchange.service.js';
 
-// 1. Crear una transacción (Mantenemos la lógica robusta de Roberto)
+// 1. Crear una transacción 
 export const createTransaction = async (req, res) => {
     try {
         const {
@@ -19,7 +19,6 @@ export const createTransaction = async (req, res) => {
         if (!account) return res.status(404).json({ success: false, message: 'Cuenta origen no encontrada' });
         if (account.state === 'INACTIVA' || account.isActive === false) return res.status(400).json({ success: false, message: 'La cuenta origen está inactiva' });
 
-        // --- INICIO DEL PARCHE DE SEGURIDAD ---
         const loggedUserId = req.user._id.toString();
         const loggedUserRole = req.user.UserRol;
 
@@ -31,7 +30,7 @@ export const createTransaction = async (req, res) => {
             });
         }
 
-        // 2. Un usuario normal NO puede hacer "DEPOSIT" (imprimir dinero de la nada)
+        // 2. Un usuario normal NO puede hacer "DEPOSIT" 
         if (type === 'DEPOSIT' && loggedUserRole !== 'ADMIN') {
             return res.status(403).json({
                 success: false,
@@ -95,7 +94,6 @@ export const createTransaction = async (req, res) => {
                 if (!cardData.isApproved)
                     return res.status(400).json({ success: false, message: 'Tarjeta no aprobada' });
 
-                // Si es débito → descuenta directo de la cuenta
                 if (cardData.type === 'DEBIT') {
 
                     if (account.balance < montoParaOrigen)
@@ -104,7 +102,6 @@ export const createTransaction = async (req, res) => {
                     account.balance -= montoParaOrigen;
                 }
 
-                // Si es crédito → aumenta deuda
                 if (cardData.type === 'CREDIT') {
 
                     if ((cardData.usedAmount + montoParaOrigen) > cardData.limit)
@@ -135,12 +132,12 @@ export const createTransaction = async (req, res) => {
                     return res.status(404).json({ success: false, message: 'Cuenta destino no encontrada' });
                 if (destAccount.status === false) return res.status(400).json({ success: false, message: 'La cuenta destino está inactiva' });
 
-                // --- REGLA 1: Límite de Q2000 por transferencia ---
+                //Límite de Q2000 por transferencia 
                 if (amountInGTQ > 2000) {
                     return res.status(400).json({ success: false, message: 'Transacción denegada: No puedes transferir más de Q2000 en una sola operación.' });
                 }
 
-                // --- REGLA 2: Límite diario de Q10,000 ---
+                // Límite diario de Q10,000 
                 // Calculamos el inicio y fin del día de hoy
                 const startOfDay = new Date();
                 startOfDay.setHours(0, 0, 0, 0);
@@ -205,7 +202,6 @@ export const createTransaction = async (req, res) => {
             currency,
             exchangeRate: rate,
             amountInGTQ: Number(amountInGTQ),
-            // Si es DEPOSIT, la cuenta de María es el DESTINO. Si no, es el ORIGEN.
             originAccount: type === 'DEPOSIT' ? null : AccountOriginId,
             destinationAccount: type === 'DEPOSIT' ? AccountOriginId : AccountDestinyId,
             card,
@@ -229,7 +225,7 @@ export const createTransaction = async (req, res) => {
     }
 };
 
-// 2. Obtener todas las transacciones de un usuario general (La de Roberto)
+// 2. Obtener todas las transacciones de un usuario general 
 export const getTransactions = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -274,29 +270,24 @@ export const getTransactions = async (req, res) => {
     }
 };
 
-// 3. Obtener el historial ESPECÍFICO de una cuenta (Tu función, pero adaptada a las variables de Roberto)
+// 3. Obtener el historial ESPECÍFICO de una cuenta 
 export const getAccountHistory = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // 1. Buscamos todas las salidas (Usando originAccount que es como lo guardas abajo)
         const salidas = await Transaction.find({ originAccount: id })
             .populate('originAccount', 'accountNumber bank')
             .populate('destinationAccount', 'accountNumber bank');
 
-        // 2. Buscamos todas las entradas (Usando destinationAccount)
         const entradas = await Transaction.find({ destinationAccount: id })
             .populate('originAccount', 'accountNumber bank')
             .populate('destinationAccount', 'accountNumber bank');
 
-        // 3. Juntamos y ordenamos manualmente (Ya que no usamos $or)
         let historyRaw = [...salidas, ...entradas];
         historyRaw.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         // 4. Mapeamos los datos para darles formato
         const historialFormateado = historyRaw.map(tx => {
-            // Verificamos si es salida comparando el ID de la cuenta de origen
-            // Usamos .toString() porque uno es objeto de Mongo y el otro es String de la URL
             const esSalida = tx.originAccount && tx.originAccount._id.toString() === id;
 
             const signo = esSalida ? '-' : '+';
@@ -336,5 +327,4 @@ export const getAccountHistory = async (req, res) => {
         });
     }
 };
-
 

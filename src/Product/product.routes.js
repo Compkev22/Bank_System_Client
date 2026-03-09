@@ -10,5 +10,4 @@ const router = Router();
 router.get('/', validateJWT, getProducts);
 
 
-
 export default router;

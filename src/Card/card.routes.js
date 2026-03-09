@@ -15,7 +15,6 @@ import { validateJWT, hasRole, isAdmin } from "../../middlewares/validate-jwt.js
 const router = Router();
 
 
-
 // 2. Crear tarjeta (Cualquiera logueado, pero el controlador valida si es su cuenta o si es Admin)
 router.post(
     '/',
