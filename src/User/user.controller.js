@@ -1,64 +1,41 @@
-import User from './user.model.js';
-import Account from '../Account/account.model.js';
-import { generateJWT } from '../../helpers/generate-jwt.js';
-import { sendTokenEmail } from '../../helpers/email.helper.js';
-
-
-export const getUserById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const loggedUserId = req.user._id;
-    const loggedUserRole = req.user.UserRol;
-
-    if (loggedUserRole === 'USER' && loggedUserId.toString() !== id) {
-        return res.status(403).json({ success: false, message: 'Acceso denegado: Solo puedes ver tu propio perfil.' });
-    }
-
-    const user = await User.findById(id);
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-    }
-
-    res.status(200).json({ success: true, data: user });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error al obtener el usuario', error: error.message });
-  }
-};
-
-
-export const updateUser = async (req, res) => {
+/**
+ * Ver mi perfil
+ * GET /client/profile
+ */
+export const getMyProfile = async (req, res) => {
     try {
-        const { id } = req.params;
-        const loggedUserId = req.user._id; 
-        const loggedUserRole = req.user.UserRol;
+        // req.user ya viene del middleware de autenticación
+        // Solo exponemos campos seguros, nunca la contraseña
+        const { UserPassword, ...safeUser } = req.user.toObject ? req.user.toObject() : req.user;
+ 
+        res.status(200).json({ success: true, data: safeUser });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error al obtener el perfil', error: error.message });
+    }
+};
+ 
+/**
+ * Actualizar mi perfil (campos permitidos)
+ * PUT /client/profile
+ */
+export const updateMyProfile = async (req, res) => {
+    try {
         const data = req.body;
-
-        if (loggedUserRole === 'USER' && loggedUserId.toString() !== id) {
-            return res.status(403).json({ success: false, message: 'No tienes permiso para editar el perfil de otro usuario' });
-        }
-
-        const targetUser = await User.findById(id);
-        if (!targetUser) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-
-        if (targetUser.UserRol === 'ADMIN' && loggedUserId.toString() !== id) {
-            return res.status(403).json({ success: false, message: 'No puedes editar a otro usuario Administrador' });
-        }
-
+ 
+        // El cliente no puede cambiar campos sensibles/estructurales
         delete data.UserDPI;
         delete data.UserPassword;
-        delete data.UserRol; 
-
-        const userUpdated = await User.findByIdAndUpdate(id, data, { new: true });
-
-        res.status(200).json({ 
-            success: true, 
-            message: 'Perfil actualizado correctamente', 
-            userUpdated 
-        });
-
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        delete data.UserRol;
+        delete data.UserStatus;
+        delete data.isVerified;
+ 
+        const updated = await User.findByIdAndUpdate(req.user.id, data, { new: true });
+        if (!updated) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+ 
+        const { UserPassword: _pw, ...safeUser } = updated.toObject();
+ 
+        res.status(200).json({ success: true, message: 'Perfil actualizado correctamente', data: safeUser });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error al actualizar el perfil', error: error.message });
     }
 };
-

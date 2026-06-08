@@ -1,34 +1,91 @@
+'use strict';
 
-import Account from "./account.model.js";
+import Account from './account.model.js';
 
-// Obtener todas las cuentas (activas)
-export const getAccounts = async (req, res) => {
+/**
+ * Obtener todas mis cuentas bancarias
+ * GET /api/client/accounts
+ */
+export const getMyAccounts = async (req, res) => {
     try {
+        const userId = req.user.id;
 
-        let accounts;
-        if (req.user.UserRol === 'USER') {
-            accounts = await Account.find({
-                // Usamos $or para buscar por el objeto o por el string, por si las moscas
-                $or: [
-                    { user: req.user._id },
-                    { user: req.user._id.toString() }
-                ],
-                status: true
-            }).populate('user', 'UserName UserSurname UserEmail');
-        } 
+        // Solo buscar cuentas que pertenezcan al usuario logueado
+        const accounts = await Account.find({ user: userId }).sort({ createdAt: -1 });
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             total: accounts.length,
-            accounts
+            data: accounts
         });
-
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener las cuentas',
-            error: error.message
-        });
+        return res.status(500).json({ success: false, message: 'Error al obtener tus cuentas', error: error.message });
     }
 };
 
+/**
+ * Obtener detalles de una cuenta específica propia
+ * GET /api/client/accounts/:id
+ */
+export const getMyAccountDetails = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+
+        const account = await Account.findById(id);
+
+        if (!account) {
+            return res.status(404).json({ success: false, message: 'Cuenta no encontrada' });
+        }
+
+        // 🛑 Filtro de seguridad crítico: Verificar propiedad
+        if (account.user.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: 'Acceso denegado: Esta cuenta no te pertenece' });
+        }
+
+        return res.status(200).json({ success: true, data: account });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Error al obtener los detalles de la cuenta', error: error.message });
+    }
+};
+
+/**
+ * Solicitar/Crear una nueva cuenta bancaria para sí mismo
+ * POST /api/client/accounts
+ */
+export const openMyAccount = async (req, res) => {
+    try {
+        const { accountType } = req.body;
+        const userId = req.user.id; // Imposible de falsificar si viene del token
+
+        // Generar un número de cuenta único de 10 dígitos
+        let isUnique = false;
+        let generatedNumber = '';
+        while (!isUnique) {
+            generatedNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+            const existingAccount = await Account.findOne({ accountNumber: generatedNumber });
+            if (!existingAccount) isUnique = true;
+        }
+
+        // Estructura blindada: El cliente no puede enviar su propio balance ni cambiar el status inicial
+        const accountData = {
+            accountNumber: generatedNumber,
+            accountType: accountType || 'AHORRO',
+            balance: 0, // 🛑 Siempre inicia en 0 para el cliente
+            user: userId,
+            status: true // Asumiendo que tu modelo usa un booleano para el estado
+        };
+
+        const newAccount = new Account(accountData);
+        await newAccount.save();
+
+        return res.status(201).json({
+            success: true,
+            message: 'Tu nueva cuenta bancaria ha sido aperturada exitosamente',
+            data: newAccount
+        });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Error interno al procesar la apertura de cuenta', error: error.message });
+    }
+};

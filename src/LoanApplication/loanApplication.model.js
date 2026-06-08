@@ -35,8 +35,8 @@ const loanApplicationSchema = new Schema({
         default: 'PENDING'
     },
     reviewedBy: {
-        type: Schema.Types.ObjectId,
-        ref: 'User'
+        type: String,
+        default: null
     },
     reviewDate: {
         type: Date

@@ -1,27 +1,36 @@
+import { body, param, validationResult } from 'express-validator';
 
-import { body } from "express-validator";
-import { checkValidators } from "./check-validators.js";
+const validateFields = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            success: false,
+            errors: errors.array().map(err => ({ field: err.path, message: err.msg }))
+        });
+    }
+    next();
+};
 
-export const validateCreateAccount = [
-    body('accountNumber')
-        .notEmpty().withMessage('El número de cuenta es requerido')
-        .isLength({ min: 10, max: 10 }).withMessage('El número de cuenta debe tener 10 dígitos'),
-    
+export const validateGetMyAccountDetails = [
+    param('id')
+        .isMongoId().withMessage('El ID de la cuenta no tiene un formato válido'),
+    validateFields
+];
+
+export const validateOpenMyAccount = [
     body('accountType')
-        .notEmpty().withMessage('El tipo de cuenta es requerido')
-        .isIn(['AHORRO', 'MONETARIA']).withMessage('Tipo de cuenta no válida'),
-    
-    body('balance')
         .optional()
-        .isFloat({ min: 0 }).withMessage('El saldo inicial debe ser mayor o igual a 0'),
-    
-    body('user')
-        .notEmpty().withMessage('El ID del usuario es requerido')
-        .isMongoId().withMessage('ID de usuario no válido'),
+        .isString().withMessage('El tipo de cuenta debe ser texto')
+        .isIn(['AHORRO', 'MONETARIA', 'PLANILLAS']).withMessage('Tipo de cuenta no válido'),
 
-    body('bank')
-        .optional() 
-        .isIn(['Banco Kinal', 'Banco Industrial', 'Banrural', 'BAC', 'G&T Continental', 'Promerica'])
-        .withMessage('El banco ingresado no está en la red autorizada'),
-    checkValidators
+    // 🛑 Prevenir inyección de campos protegidos
+    body(['balance', 'user', 'accountNumber', 'status', 'accountStatus', '_id'])
+        .custom((value) => {
+            if (value !== undefined) {
+                throw new Error('Petición rechazada: Intentaste enviar campos protegidos o de solo lectura');
+            }
+            return true;
+        }),
+
+    validateFields
 ];

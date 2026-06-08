@@ -1,3 +1,4 @@
+'use strict';
 
 import { Schema, model } from "mongoose";
 
@@ -39,12 +40,10 @@ const accountSchema = Schema({
         type: String,
         enum: ['Banco Kinal', 'Banco Industrial', 'Banrural', 'BAC', 'G&T Continental', 'Promerica'],
         default: 'Banco Kinal'
-    },
+    }
 }, {
     timestamps: true,
     versionKey: false
 });
-
-
 
 export default model('Account', accountSchema);

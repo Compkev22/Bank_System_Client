@@ -2,52 +2,32 @@
 import jwt from 'jsonwebtoken';
 import User from '../src/User/user.model.js';
 
+// validate-jwt.js
 export const validateJWT = async (req, res, next) => {
-    const token = req.header('x-token') || req.header('Authorization')?.replace('Bearer ', '');
-
-    if (!token) return res.status(401).json({ message: 'No hay token en la petición' });
-
     try {
-        const { uid } = jwt.verify(token, process.env.SECRET_KEY);
-        const user = await User.findById(uid);
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        if (!token) return res.status(401).json({ message: 'No hay token' });
 
-        if (!user || user.UserStatus === 'INACTIVE' || user.deletedAt) {
-            return res.status(401).json({ message: 'Token no válido - Usuario no disponible' });
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+
+        // 1. Extraer el rol (manejando el formato de .NET con SQL)
+        // Buscamos en 'role' o en el claim estándar de Microsoft
+        let roleFromToken = decoded.role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+        // 2. Si el usuario tiene varios roles (vía user_roles), .NET manda un Array.
+        // Nos aseguramos de tomar el que necesitamos o normalizarlo.
+        if (Array.isArray(roleFromToken)) {
+            roleFromToken = roleFromToken[0]; // Tomamos el primer rol para simplificar
         }
 
-        req.user = user; // Guardamos al usuario en la req para usarlo después
+        req.user = {
+            id: decoded.sub || decoded.uid,
+            role: roleFromToken // Ahora sí será "ADMIN_ROLE"
+        };
+
         next();
     } catch (error) {
-        res.status(401).json({ message: 'Token no válido o expirado' });
+        console.error("JWT Error:", error.message);
+        return res.status(401).json({ message: 'Token inválido' });
     }
-};
-
-export const isAdmin = (req, res, next) => {
-    if (!req.user) {
-        return res.status(401).json({ message: 'No autenticado' });
-    }
-    if (req.user.UserRol !== 'ADMIN') {
-        return res.status(403).json({ message: 'Acceso solo para administradores' });
-    }
-    next();
-};
-
-export const hasRole = (...roles) => {
-    return (req, res, next) => {
-        if (!req.user) {
-            return res.status(401).json({
-                success: false,
-                message: 'Usuario no autenticado'
-            });
-        }
-
-        if (!roles.includes(req.user.UserRol)) {
-            return res.status(403).json({
-                success: false,
-                message: `Acceso permitido solo para: ${roles.join(', ')}`
-            });
-        }
-
-        next();
-    };
 };

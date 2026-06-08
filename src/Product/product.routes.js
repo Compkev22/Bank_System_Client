@@ -1,13 +1,18 @@
-'use strict';
-
 import { Router } from 'express';
-import { validateJWT, isAdmin } from '../../middlewares/validate-jwt.js';
-import { getProducts, } from './product.controller.js';
+import { getActiveProducts, getProductById } from './product.controller.js';
+import { validateJWT } from '../../middlewares/validate-jwt.js';
+import { hasRole } from '../../middlewares/role-validator.js';
+import { validateGetProducts, validateGetProductById } from '../../middlewares/product.validator.js';
 
 const router = Router();
-  
-// Ruta de lectura: Cualquier usuario logueado puede ver el catálogo
-router.get('/', validateJWT, getProducts);
 
+// Middlewares de autenticación (Opcional si quieres que el catálogo sea público)
+router.use(validateJWT, hasRole('CLIENT_ROLE'));
+
+// Obtener todo el catálogo paginado
+router.get('/', validateGetProducts, getActiveProducts);
+
+// Obtener un producto específico
+router.get('/:id', validateGetProductById, getProductById);
 
 export default router;

@@ -1,6 +1,9 @@
 'use strict';
 import { convertCurrency } from './exchange.service.js';
 
+/**
+ * Convertir montos entre monedas
+ */
 export const convertAmount = async (req, res) => {
     try {
         const { amount, from, to } = req.body;

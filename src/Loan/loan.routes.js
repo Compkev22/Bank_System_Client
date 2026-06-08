@@ -1,27 +1,13 @@
-'use strict';
-
 import { Router } from 'express';
-
-// IMPORTACIÓN CORREGIDA
-import { validateJWT, hasRole } from '../../middlewares/validate-jwt.js';
-
-import {
-    getMyLoans,
-    getLoanById
-} from './loan.controller.js';
+import { getMyLoans, getMyLoanById } from './loan.controller.js';
+import { validateJWT } from '../../middlewares/validate-jwt.js';
+import { hasRole } from '../../middlewares/role-validator.js';
+import { validateGetMyLoanById } from '../../middlewares/loan-validator.js';
 
 const router = Router();
+router.use(validateJWT, hasRole('CLIENT_ROLE'));
 
+router.get('/', getMyLoans);
+router.get('/:id', validateGetMyLoanById, getMyLoanById);
 
-router.get('/my-loans',
-    validateJWT,
-    hasRole('USER'),
-    getMyLoans
-);
-
-router.get('/:id',
-    validateJWT,
-    getLoanById
-);
-
-export default router;
+export default router;  

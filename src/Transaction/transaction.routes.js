@@ -1,37 +1,42 @@
-'use strict';
-
 import { Router } from 'express';
-import {
-    getTransactions,
-    createTransaction,
-    getAccountHistory,
-} from '../Transaction/transaction.controller.js';
+import { 
+    getMyTransactions, 
+    getMyAccountHistory, 
+    createMyTransaction 
+} from './transaction.controller.js';
 
+// Middlewares de seguridad
 import { validateJWT } from '../../middlewares/validate-jwt.js';
+import { hasRole } from '../../middlewares/role-validator.js';
 
-import {
-    validateCreateTransaction,
-    validateHistoryId
+// Validadores
+import { 
+    validateGetMyTransactions, 
+    validateGetMyAccountHistory, 
+    validateCreateMyTransaction 
 } from '../../middlewares/transaction.validator.js';
 
 const router = Router();
 
-router.post('/',
-    validateJWT,
-    validateCreateTransaction,
-    createTransaction
-);
+// Todas las rutas de este submódulo requieren que el usuario esté autenticado y sea CLIENTE
+router.use(validateJWT, hasRole('CLIENT_ROLE'));
 
+/**
+ * Obtener todas mis transacciones (paginado)
+ * GET /api/client/transactions
+ */
+router.get('/', validateGetMyTransactions, getMyTransactions);
 
-router.get('/account/:id/history', 
-    validateJWT,
-    validateHistoryId, 
-    getAccountHistory
-);
+/**
+ * Obtener el historial formateado de ingresos/egresos de una cuenta específica
+ * GET /api/client/transactions/account/:id
+ */
+router.get('/account/:id', validateGetMyAccountHistory, getMyAccountHistory);
 
-router.get('/', 
-    validateJWT, 
-    getTransactions
-);
+/**
+ * Crear una nueva transacción (Transferencias, pagos, etc.)
+ * POST /api/client/transactions
+ */
+router.post('/', validateCreateMyTransaction, createMyTransaction);
 
 export default router;

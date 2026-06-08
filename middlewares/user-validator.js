@@ -1,146 +1,54 @@
-import { body, param } from 'express-validator';
-import { checkValidators } from './check-validators.js';
+import { body, validationResult } from 'express-validator';
 
-export const validateCreateUser = [
-    body('UserName')
-        .trim()
-        .notEmpty()
-        .withMessage('El nombre es requeridoo')
-        .isLength({ min: 2, max: 100 })
-        .withMessage('El nombre debe tener entre 2 y 100 caracteres'),
+// Captura y responde con los errores de validación de forma limpia y estructurada
+const validateFields = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            success: false,
+            errors: errors.array().map(err => ({
+                field: err.path,
+                message: err.msg
+            }))
+        });
+    }
+    next();
+};
 
-    body('UserSurname')
-        .trim()
-        .notEmpty()
-        .withMessage('El apellido es requerido')
-        .isLength({ min: 2, max: 100 })
-        .withMessage('El apellido debe tener entre 2 y 100 caracteres'),
-
-    body('UserDPI')
-        .trim()
-        .notEmpty()
-        .withMessage('El DPI es requerido')
-        .isLength({ min: 13, max: 15 })
-        .withMessage('El DPI debe tener entre 13 y 15 caracteres')
-        .isNumeric()
-        .withMessage('El DPI solo debe contener números'),
-
-    body('UserEmail')
-        .trim()
-        .notEmpty()
-        .withMessage('El correo es requerido')
-        .isEmail()
-        .withMessage('Debe ser un correo electrónico válido'),
-
-    body('UserPassword')
-        .notEmpty()
-        .withMessage('La contraseña es requerida')
-        .isLength({ min: 6 })
-        .withMessage('La contraseña debe tener al menos 6 caracteres'),
-
-    body('UserRol')
-        .optional()
-        .isIn(['ADMIN', 'USER'])
-        .withMessage('Rol no válido'),
-
-    body('UserStatus')
-        .optional()
-        .isIn(['ACTIVE', 'INACTIVE'])
-        .withMessage('Estado no válido'),
-
-    body('UserAddress')
-        .notEmpty().withMessage('La dirección es requerida'),
-
-    body('UserPhone')
-        .notEmpty().withMessage('El celular es requerido'),
-
-    body('UserJob')
-        .notEmpty().withMessage('El nombre de trabajo es requerido'),
-
-    body('UserIncome')
-        .notEmpty().withMessage('Los ingresos mensuales son requeridos')
-        .isNumeric().withMessage('Los ingresos deben ser un número')
-        .isFloat({ min: 100 }).withMessage('Transacción denegada: Los ingresos mensuales deben ser iguales o mayores a Q100 para abrir una cuenta.'),    
-    checkValidators,
-];
-
-export const validateUpdateUserRequest = [
-    param('id')
-        .isMongoId()
-        .withMessage('ID debe ser un ObjectId válido de MongoDB'),
-
+/**
+ * Validar la actualización del perfil del cliente (PUT /)
+ */
+export const validateUpdateProfile = [
     body('UserName')
         .optional()
+        .isString().withMessage('El nombre debe ser una cadena de texto')
         .trim()
-        .isLength({ min: 2, max: 100 })
-        .withMessage('El nombre debe tener entre 2 y 100 caracteres'),
+        .isLength({ min: 2, max: 50 }).withMessage('El nombre debe tener entre 2 y 50 caracteres'),
 
     body('UserSurname')
         .optional()
+        .isString().withMessage('El apellido debe ser una cadena de texto')
         .trim()
-        .isLength({ min: 2, max: 100 })
-        .withMessage('El apellido debe tener entre 2 y 100 caracteres'),
-
-    body('UserDPI')
-        .optional()
-        .trim()
-        .isLength({ min: 13, max: 15 })
-        .withMessage('El DPI debe tener entre 13 y 15 caracteres')
-        .isNumeric()
-        .withMessage('El DPI solo debe contener números'),
+        .isLength({ min: 2, max: 50 }).withMessage('El apellido debe tener entre 2 y 50 caracteres'),
 
     body('UserEmail')
         .optional()
-        .trim()
-        .isEmail()
-        .withMessage('Debe ser un correo electrónico válido'),
-
-    body('UserPassword')
-        .optional()
-        .isLength({ min: 6 })
-        .withMessage('La contraseña debe tener al menos 6 caracteres'),
-
-    body('UserRol')
-        .optional()
-        .isIn(['ADMIN', 'USER'])
-        .withMessage('Rol no válido'),
-
-    body('UserStatus')
-        .optional()
-        .isIn(['ACTIVE', 'INACTIVE'])
-        .withMessage('Estado no válido'),
-    
-    body('UserAddress')
-        .optional()
-        .notEmpty().withMessage('La dirección es requerida'),
+        .isEmail().withMessage('Debe proporcionar un correo electrónico válido')
+        .normalizeEmail(),
 
     body('UserPhone')
         .optional()
-        .notEmpty().withMessage('El celular es requerido'),
+        .isNumeric().withMessage('El teléfono solo debe contener números')
+        .isLength({ min: 8, max: 15 }).withMessage('El teléfono debe tener un rango válido de caracteres'),
 
-    body('UserJob')
-        .optional()
-        .notEmpty().withMessage('El nombre de trabajo es requerido'),
+    // 🛑 Bloqueo estricto de campos de infraestructura, rol e identidad
+    body(['UserDPI', 'UserPassword', 'UserRol', 'UserStatus', 'isVerified', '_id', 'id'])
+        .custom((value) => {
+            if (value !== undefined) {
+                throw new Error('No tienes permisos para modificar campos críticos de identidad o credenciales en este endpoint');
+            }
+            return true;
+        }),
 
-    body('UserIncome')
-        .optional()
-        .notEmpty().withMessage('Los ingresos mensuales son requeridos')
-        .isNumeric().withMessage('Los ingresos deben ser un número')
-        .isFloat({ min: 100 }).withMessage('Transacción denegada: Los ingresos mensuales deben ser iguales o mayores a Q100 para abrir una cuenta.'),
-    checkValidators,
-];
-
-// Validación para activar/desactivar usuario
-export const validateUserStatusChange = [
-    param('id')
-        .isMongoId()
-        .withMessage('ID debe ser un ObjectId válido de MongoDB'),
-    checkValidators,
-];
-
-export const validateGetUserById = [
-    param('id')
-        .isMongoId()
-        .withMessage('ID debe ser un ObjectId válido de MongoDB'),
-    checkValidators,
+    validateFields
 ];

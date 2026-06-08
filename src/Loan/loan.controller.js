@@ -1,47 +1,27 @@
-'use strict';
+'use strict'
 
 import Loan from './loan.model.js';
 
-// Obtener préstamos del usuario
 export const getMyLoans = async (req, res) => {
     try {
-        const loans = await Loan.find({ borrower: req.user._id })
-            .populate('account', 'accountNumber balance');
+        const loans = await Loan.find({ borrower: req.user.id })
+            .populate('account', 'accountNumber balance status');
 
-        res.status(200).json({
-            success: true,
-            total: loans.length,
-            loans
-        });
-
+        res.status(200).json({ success: true, total: loans.length, data: loans });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Error al obtener tus préstamos', error: error.message });
     }
 };
 
-
-
-
-// Obtener préstamo por ID
-export const getLoanById = async (req, res) => {
+export const getMyLoanById = async (req, res) => {
     try {
-        const loan = await Loan.findById(req.params.id)
-            .populate('borrower', 'UserName UserEmail')
-            .populate('account');
+        const loan = await Loan.findOne({ _id: req.params.id, borrower: req.user.id })
+            .populate('account', 'accountNumber');
 
-        if (!loan)
-            return res.status(404).json({ success: false, message: 'Préstamo no encontrado' });
+        if (!loan) return res.status(404).json({ success: false, message: 'Préstamo no encontrado o no autorizado' });
 
-        if (
-            loan.borrower._id.toString() !== req.user._id.toString() &&
-            req.user.UserRol !== 'ADMIN'
-        ) {
-            return res.status(403).json({ success: false, message: 'No autorizado' });
-        }
-
-        res.status(200).json({ success: true, loan });
-
+        res.status(200).json({ success: true, data: loan });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Error al obtener el préstamo', error: error.message });
     }
 };
