@@ -3,6 +3,7 @@ import { login, register, verifyEmail, registerInternal, verifyInternal } from '
 import { validateJWT } from '../../middlewares/validate-jwt.js';
 import { validateInternalRequest } from '../../middlewares/internal-auth.js';
 
+
 const api = Router();
 
 api.post('/register', register);
