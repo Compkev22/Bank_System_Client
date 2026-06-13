@@ -13,7 +13,7 @@ import {
 const router = Router();
 
 // Aplicar roles y JWT a nivel de ruta global (opcional, si todas las rutas lo usan)
-router.use(validateJWT, hasRole('CLIENT_ROLE'));
+router.use(validateJWT, hasRole('USER'));
 
 // 1. Obtener tarjetas con query string validado
 router.get('/', validateGetMyCards, getMyCards);

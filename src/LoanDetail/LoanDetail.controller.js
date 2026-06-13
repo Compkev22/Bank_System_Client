@@ -47,7 +47,7 @@ export const payMyInstallment = async (req, res) => {
         await Transaction.create({
             type: 'LOAN_PAYMENT',
             amount: installment.amount,
-            amountInGTQ: installment.amount,
+            amountInGTQ: installment.amount, // ← agregar esta línea
             originAccount: accountId,
             loan: loanId,
             description: `Pago de cuota #${installment.installmentNumber} del préstamo`,

@@ -56,7 +56,7 @@ export const getMyAccountDetails = async (req, res) => {
 export const openMyAccount = async (req, res) => {
     try {
         const { accountType } = req.body;
-        const userId = req.user.id; // Imposible de falsificar si viene del token
+        const userId = req.user.id;
 
         // Generar un número de cuenta único de 10 dígitos
         let isUnique = false;

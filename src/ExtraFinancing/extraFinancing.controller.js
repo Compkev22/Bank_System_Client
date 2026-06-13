@@ -10,13 +10,13 @@ export const getMyFinancings = async (req, res) => {
     try {
         const financings = await ExtraFinancing.find({ user: req.user.id })
             .populate('creditCard', 'cardNumber type');
- 
+
         res.status(200).json({ success: true, data: financings });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error al obtener financiamientos', error: error.message });
     }
 };
- 
+
 /**
  * Solicitar un extra-financiamiento sobre una de mis tarjetas de crédito
  * POST /client/extra-financings
@@ -24,34 +24,29 @@ export const getMyFinancings = async (req, res) => {
 export const requestExtraFinancing = async (req, res) => {
     try {
         const { creditCard, totalAmount, installments, description } = req.body;
- 
+
         const card = await CreditCard.findById(creditCard);
         if (!card) return res.status(404).json({ success: false, message: 'Tarjeta de crédito no encontrada' });
- 
+
         if (card.user.toString() !== req.user.id.toString()) {
             return res.status(403).json({ success: false, message: 'Esta tarjeta de crédito no te pertenece' });
         }
         if (card.status !== 'ACTIVE') {
             return res.status(400).json({ success: false, message: 'La tarjeta no está activa para este beneficio' });
         }
- 
-        const interestRate = card.interestRate ?? 1.5;
-        const interest = totalAmount * (interestRate / 100);
-        const monthlyPayment = parseFloat(((totalAmount / installments) + interest).toFixed(2));
- 
+
+
         const newFinancing = new ExtraFinancing({
             description,
             creditCard,
             user: req.user.id,
             totalAmount,
-            remainingBalance: totalAmount,
             installments,
-            monthlyPayment,
-            interestRate,
+            interestRate: card.interestRate ?? 1.5,
         });
- 
+
         await newFinancing.save();
- 
+
         // Generar cuotas automáticamente en cascada
         const today = new Date();
         const details = Array.from({ length: installments }, (_, i) => ({
@@ -61,9 +56,9 @@ export const requestExtraFinancing = async (req, res) => {
             expectedDate: new Date(today.getFullYear(), today.getMonth() + i + 1, today.getDate()),
             status: 'PENDING',
         }));
- 
+
         await ExtraFinancingDetail.insertMany(details);
- 
+
         res.status(201).json({
             success: true,
             message: 'Extra-financiamiento solicitado exitosamente',

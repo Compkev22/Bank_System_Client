@@ -9,7 +9,7 @@ import { validatePayLoanInstallment } from '../../middlewares/loanPayment-valida
 const router = Router();
 
 // Protegemos la ruta para que solo usuarios autenticados puedan procesar pagos
-router.use(validateJWT, hasRole('CLIENT_ROLE'));
+router.use(validateJWT, hasRole('USER'));
 
 /**
  * Procesar el pago de la próxima cuota de un préstamo

@@ -7,12 +7,12 @@ import Account from '../Account/account.model.js';
 export const addFavorite = async (req, res) => {
     try {
         const { accountId, alias } = req.body;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         // 1. Verificar que la cuenta que quieren guardar existe
         const account = await Account.findById(accountId);
         if (!account) return res.status(404).json({ success: false, message: 'La cuenta bancaria no existe' });
-        
+
         if (!account.status) return res.status(400).json({ success: false, message: 'No puedes agregar una cuenta inactiva a favoritos' });
 
         // 3. Verificar que no la haya agregado ya antes
@@ -40,13 +40,13 @@ export const addFavorite = async (req, res) => {
 // Obtener los favoritos del usuario logueado
 export const getMyFavorites = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         const favorites = await Favorite.find({ user: userId })
             .populate({
                 path: 'account',
                 select: 'accountNumber accountType bank user',
-                populate: { path: 'user', select: 'UserName UserSurname' } 
+                populate: { path: 'user', select: 'UserName UserSurname' }
             })
             .sort({ createdAt: -1 });
 
@@ -64,7 +64,7 @@ export const getMyFavorites = async (req, res) => {
 export const removeFavorite = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         const favorite = await Favorite.findOneAndDelete({ _id: id, user: userId });
 

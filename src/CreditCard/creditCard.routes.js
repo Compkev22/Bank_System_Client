@@ -6,7 +6,7 @@ import { validateRequestCreditCard } from '../../middlewares/creditCard-validato
 
 const router = Router();
 
-router.use(validateJWT, hasRole('CLIENT_ROLE'));
+router.use(validateJWT, hasRole('USER'));
 
 // GET /client/credit-cards
 router.get('/', getMyCreditCards);

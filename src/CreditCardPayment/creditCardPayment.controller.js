@@ -1,3 +1,9 @@
+'use strict' 
+
+import CreditCardPayment from "./creditCardPayment.model.js";
+import CreditCard from "../CreditCard/creditCard.model.js";
+import Account from "../Account/account.model.js"
+
 /**
  * Pagar mi tarjeta de crédito
  * POST /client/credit-cards/pay

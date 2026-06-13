@@ -7,7 +7,7 @@ import { validateGetProducts, validateGetProductById } from '../../middlewares/p
 const router = Router();
 
 // Middlewares de autenticación (Opcional si quieres que el catálogo sea público)
-router.use(validateJWT, hasRole('CLIENT_ROLE'));
+router.use(validateJWT, hasRole('USER'));
 
 // Obtener todo el catálogo paginado
 router.get('/', validateGetProducts, getActiveProducts);

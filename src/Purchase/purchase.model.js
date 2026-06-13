@@ -18,12 +18,18 @@ const purchaseSchema = new Schema({
         enum: ['CREDIT', 'DEBIT'],
         required: true
     },
-    cardId: { 
+    cardId: {
         type: Schema.Types.ObjectId,
-        required: true
+        required: true,
+        refPath: 'cardType'
+    },
+    cardType: {
+        type: String,
+        required: true,
+        enum: ['CreditCard', 'Account']
     },
     merchant: {
-        type: String, 
+        type: String,
         default: 'Comercio Local'
     },
     date: {

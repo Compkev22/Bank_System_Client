@@ -1,9 +1,10 @@
 'use strict';
 
 import Loan from '../Loan/loan.model.js';
-import LoanDetail from '../LoanDetail/loanDetail.model.js';
+import LoanDetail from '../LoanDetail/LoanDetail.model.js';
 import Account from '../Account/account.model.js';
 import Transaction from '../Transaction/transaction.model.js';
+import LoanPayment from '../LoanPayment/loanPayment.model.js';
 
 /**
  * Pagar la próxima cuota de un préstamo propio (Funcionalidad de Cliente)
@@ -22,19 +23,17 @@ export const payLoanInstallment = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Préstamo o Cuenta no encontrados' });
         }
 
-        // 2. 🛑 Filtro de seguridad: El préstamo debe pertenecer al cliente logueado
         if (loan.borrower.toString() !== userId.toString()) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'No estás autorizado a realizar pagos sobre este préstamo' 
+            return res.status(403).json({
+                success: false,
+                message: 'No estás autorizado a realizar pagos sobre este préstamo'
             });
         }
 
-        // 3. 🛑 Filtro de seguridad: La cuenta de débito debe pertenecer al cliente logueado
         if (account.user.toString() !== userId.toString()) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'La cuenta seleccionada para el pago no te pertenece' 
+            return res.status(403).json({
+                success: false,
+                message: 'La cuenta seleccionada para el pago no te pertenece'
             });
         }
 
@@ -74,12 +73,21 @@ export const payLoanInstallment = async (req, res) => {
         const transaction = new Transaction({
             type: 'LOAN_PAYMENT',
             amount: installment.amount,
+            amountInGTQ: installment.amount, // ← agregar esta línea
             originAccount: account._id,
             description: `Pago de cuota #${installment.installmentNumber} del préstamo ${loan._id}`,
             status: 'COMPLETED',
             date: new Date()
         });
         await transaction.save();
+        
+        await LoanPayment.create({
+            loan: loanId,
+            account: accountId,
+            installmentDetail: installment._id,
+            amountPaid: installment.amount,
+            description: `Pago de cuota #${installment.installmentNumber} del préstamo ${loan._id}`
+        });
 
         // 8. Responder con el estado financiero calculado en tiempo real
         res.status(200).json({

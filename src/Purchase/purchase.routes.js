@@ -7,7 +7,7 @@ import { validateGetPurchases, validateProcessPurchase } from '../../middlewares
 const router = Router();
 
 // Todas las rutas de compras están protegidas para clientes
-router.use(validateJWT, hasRole('CLIENT_ROLE'));
+router.use(validateJWT, hasRole('USER'));
 
 // Obtener compras (Requiere ?cardId= en la query)
 router.get('/', validateGetPurchases, getMyPurchases);

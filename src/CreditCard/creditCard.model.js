@@ -51,8 +51,8 @@ const creditCardSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['ACTIVE', 'BLOCKED', 'CANCELLED'],
-        default: 'ACTIVE'
+        enum: ['PENDING', 'ACTIVE', 'BLOCKED', 'CANCELLED'],
+        default: 'PENDING'
     }
 }, {
     timestamps: true,

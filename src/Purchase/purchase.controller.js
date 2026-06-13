@@ -26,7 +26,7 @@ export const getMyPurchases = async (req, res) => {
         }
 
         const purchases = await Purchase.find({ cardId }).sort({ createdAt: -1 });
-        
+
         res.status(200).json({ success: true, total: purchases.length, data: purchases });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error al obtener compras', error: error.message });
@@ -45,7 +45,7 @@ export const processMyPurchase = async (req, res) => {
         if (type === 'CREDIT') {
             // Filtro de seguridad: Buscar la tarjeta asegurando que el owner sea el usuario logueado
             const card = await CreditCard.findOne({ _id: cardId, user: userId });
-            
+
             if (!card) return res.status(404).json({ success: false, message: 'Tarjeta de crédito no encontrada o no autorizada' });
             if (card.status !== 'ACTIVE') return res.status(400).json({ success: false, message: 'Tarjeta inactiva o bloqueada' });
 
@@ -60,9 +60,9 @@ export const processMyPurchase = async (req, res) => {
         } else if (type === 'DEBIT') {
             // Filtro de seguridad: Buscar la cuenta asegurando que el owner sea el usuario logueado
             const account = await Account.findOne({ _id: cardId, user: userId });
-            
+
             if (!account) return res.status(404).json({ success: false, message: 'Cuenta vinculada no encontrada o no autorizada' });
-            if (account.status !== 'ACTIVE') return res.status(400).json({ success: false, message: 'La cuenta no está activa' });
+            if (!account.status) return res.status(400).json({ success: false, message: 'La cuenta no está activa' });
 
             if (amount > account.balance) {
                 return res.status(400).json({ success: false, message: 'Saldo insuficiente en la cuenta de débito' });
@@ -73,7 +73,13 @@ export const processMyPurchase = async (req, res) => {
         }
 
         // Registrar el comprobante de la compra
-        const newPurchase = new Purchase({ description, amount, type, cardId });
+        const newPurchase = new Purchase({
+            description,
+            amount,
+            type,
+            cardId,
+            cardType: type === 'CREDIT' ? 'CreditCard' : 'Account'
+        });
         await newPurchase.save();
 
         res.status(201).json({

@@ -1,3 +1,5 @@
+import User from "./user.model.js"
+
 /**
  * Ver mi perfil
  * GET /client/profile
