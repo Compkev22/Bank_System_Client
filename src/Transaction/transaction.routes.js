@@ -19,7 +19,7 @@ import {
 const router = Router();
 
 // Todas las rutas de este submódulo requieren que el usuario esté autenticado y sea CLIENTE
-router.use(validateJWT, hasRole('USER'));
+router.use(validateJWT, hasRole('USER_ROLE'));
 
 /**
  * Obtener todas mis transacciones (paginado)

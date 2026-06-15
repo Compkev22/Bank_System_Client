@@ -11,7 +11,7 @@ import { validateUpdateProfile } from '../../middlewares/user-validator.js';
 const router = Router();
 
 // Todo el submódulo de perfil requiere una sesión activa de CLIENTE
-router.use(validateJWT, hasRole('USER'));
+router.use(validateJWT, hasRole('USER_ROLE'));
 
 /**
  * Ver mi propio perfil de usuario

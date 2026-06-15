@@ -6,7 +6,7 @@ import { validateRequestExtraFinancing } from '../../middlewares/extraFinancing-
 
 const router = Router();
 
-router.use(validateJWT, hasRole('USER'));
+router.use(validateJWT, hasRole('USER_ROLE'));
 
 // GET /client/extra-financings
 router.get('/', getMyFinancings);

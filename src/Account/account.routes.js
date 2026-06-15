@@ -11,7 +11,7 @@ import { validateGetMyAccountDetails, validateOpenMyAccount } from '../../middle
 const router = Router();
 
 // Todas las rutas requieren autenticación y rol de cliente
-router.use(validateJWT, hasRole('USER'));
+router.use(validateJWT, hasRole('USER_ROLE'));
 
 /**
  * Listar mis cuentas

@@ -6,7 +6,7 @@ import { validatePayCreditCard, validateGetPaymentsQuery } from '../../middlewar
 
 const router = Router();
 
-router.use(validateJWT, hasRole('USER'));
+router.use(validateJWT, hasRole('USER_ROLE'));
 
 // POST /client/credit-cards/pay
 router.post('/pay', validatePayCreditCard, payCreditCard);

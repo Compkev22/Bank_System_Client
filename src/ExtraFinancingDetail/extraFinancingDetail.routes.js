@@ -6,7 +6,7 @@ import { validateGetDetailsParam } from '../../middlewares/extraFinancingDetail-
 
 const router = Router();
 
-router.use(validateJWT, hasRole('USER'));
+router.use(validateJWT, hasRole('USER_ROLE'));
 
 // GET /client/extra-financing-details/:financingId
 router.get('/:financingId', validateGetDetailsParam, getMyFinancingDetails);

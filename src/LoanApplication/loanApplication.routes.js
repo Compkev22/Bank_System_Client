@@ -5,7 +5,7 @@ import { hasRole } from '../../middlewares/role-validator.js';
 import { validateCreateApplication, validateUpdateApplication, validateParamId } from '../../middlewares/loanApplication.validator.js';
 
 const router = Router();
-router.use(validateJWT, hasRole('USER'));
+router.use(validateJWT, hasRole('USER_ROLE'));
 
 router.get('/', getMyLoanApplications);
 router.post('/', validateCreateApplication, createLoanApplication);

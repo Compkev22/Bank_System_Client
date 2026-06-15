@@ -6,7 +6,7 @@ import { validatePayInstallment } from '../../middlewares/extraFinancingPayment-
 
 const router = Router();
 
-router.use(validateJWT, hasRole('USER'));
+router.use(validateJWT, hasRole('USER_ROLE'));
 
 // POST /client/extra-financing-payments
 router.post('/', validatePayInstallment, payMyFinancingInstallment);
