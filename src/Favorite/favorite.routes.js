@@ -11,7 +11,7 @@ const router = Router();
 router.use(validateJWT);
 
 router.post('/', validateAddFavorite, addFavorite); // Aquí meteremos los validadores de la T39
-router.get('/my-favorites', getMyFavorites);
+router.get('/', getMyFavorites);
 router.delete('/:id', validateRemoveFavorite, removeFavorite);
 
 export default router;
