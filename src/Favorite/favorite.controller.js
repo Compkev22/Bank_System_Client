@@ -6,22 +6,21 @@ import Account from '../Account/account.model.js';
 // Agregar una cuenta a favoritos
 export const addFavorite = async (req, res) => {
     try {
-        const { accountId, alias } = req.body;
+        const { accountNumber, alias } = req.body;
         const userId = req.user.id;
 
-        // 1. Verificar que la cuenta que quieren guardar existe
-        const account = await Account.findById(accountId);
+        // Buscar la cuenta por número de cuenta en lugar de ID
+        const account = await Account.findOne({ accountNumber });
         if (!account) return res.status(404).json({ success: false, message: 'La cuenta bancaria no existe' });
 
         if (!account.status) return res.status(400).json({ success: false, message: 'No puedes agregar una cuenta inactiva a favoritos' });
 
-        // 3. Verificar que no la haya agregado ya antes
-        const existingFav = await Favorite.findOne({ user: userId, account: accountId });
+        const existingFav = await Favorite.findOne({ user: userId, account: account._id });
         if (existingFav) return res.status(400).json({ success: false, message: 'Ya tienes esta cuenta en tus favoritos' });
 
         const favorite = new Favorite({
             user: userId,
-            account: accountId,
+            account: account._id,
             alias
         });
 
