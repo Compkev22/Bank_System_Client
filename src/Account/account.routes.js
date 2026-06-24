@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getMyAccounts, getMyAccountDetails, openMyAccount } from './account.controller.js';
+import { getMyAccounts, getMyAccountDetails, openMyAccount, findAccountByNumber } from './account.controller.js';
 
 // Middlewares de seguridad
 import { validateJWT } from '../../middlewares/validate-jwt.js';
@@ -23,6 +23,7 @@ router.get('/', getMyAccounts);
  * Ver detalle de una de mis cuentas
  * GET /api/client/accounts/:id
  */
+router.get('/find', findAccountByNumber);
 router.get('/:id', validateGetMyAccountDetails, getMyAccountDetails);
 
 /**

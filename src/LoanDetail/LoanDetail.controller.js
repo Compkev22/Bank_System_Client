@@ -1,4 +1,4 @@
-import LoanDetail from './loanDetail.model.js';
+import LoanDetail from './LoanDetail.model.js';
 import Loan from '../Loan/loan.model.js';
 import Account from '../Account/account.model.js';
 import Transaction from '../Transaction/transaction.model.js';
