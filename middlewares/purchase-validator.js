@@ -15,6 +15,11 @@ export const validateGetPurchases = [
     query('cardId')
         .notEmpty().withMessage('El parámetro cardId es obligatorio en la URL')
         .isMongoId().withMessage('El cardId proporcionado no es válido'),
+
+    query('debitCardId')
+        .optional()
+        .isMongoId().withMessage('El debitCardId proporcionado no es válido'),
+
     validateFields
 ];
 
@@ -36,10 +41,13 @@ export const validateProcessPurchase = [
         .notEmpty().withMessage('El ID del método de pago (cardId) es obligatorio')
         .isMongoId().withMessage('El formato del cardId no es válido'),
 
-    // Prevenir inyección de campos protegidos
+    body('debitCard')
+        .optional({ nullable: true })
+        .isMongoId().withMessage('El formato del debitCard no es válido'),
+
     body(['status', 'createdAt', '_id']).custom(v => {
-        if(v) throw new Error('No puedes enviar campos protegidos en el body'); 
-        return true; 
+        if (v) throw new Error('No puedes enviar campos protegidos en el body');
+        return true;
     }),
 
     validateFields
