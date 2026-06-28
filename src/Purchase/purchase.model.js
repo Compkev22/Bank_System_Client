@@ -28,6 +28,11 @@ const purchaseSchema = new Schema({
         required: true,
         enum: ['CreditCard', 'Account']
     },
+    debitCard: {
+        type: Schema.Types.ObjectId,
+        ref: 'Card',
+        default: null
+    },
     merchant: {
         type: String,
         default: 'Comercio Local'
