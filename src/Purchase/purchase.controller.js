@@ -14,6 +14,7 @@ export const getMyPurchases = async (req, res) => {
         const { cardId, debitCardId } = req.query;
         const userId = req.user.id;
 
+
         if (!cardId) {
             return res.status(400).json({
                 success: false,
@@ -23,7 +24,7 @@ export const getMyPurchases = async (req, res) => {
 
         // Verificar propiedad antes de mostrar el historial
         const isCreditCardOwner = await CreditCard.exists({ _id: cardId, user: userId });
-        const isAccountOwner    = await Account.exists({ _id: cardId, user: userId });
+        const isAccountOwner = await Account.exists({ _id: cardId, user: userId });
 
         if (!isCreditCardOwner && !isAccountOwner) {
             return res.status(403).json({
@@ -40,7 +41,7 @@ export const getMyPurchases = async (req, res) => {
             const debitCardDoc = await Card.findById(debitCardId).populate('account', 'user');
             if (
                 !debitCardDoc ||
-                debitCardDoc.account?.user?.toString() !== userId
+                debitCardDoc.account?.user?.toString() !== userId.toString()
             ) {
                 return res.status(403).json({
                     success: false,

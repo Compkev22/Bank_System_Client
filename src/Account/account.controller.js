@@ -53,6 +53,7 @@ export const getMyAccountDetails = async (req, res) => {
  *
  * El usuario elige accountType, currency y bank.
  * Todo lo demás (balance, status, requestStatus, accountNumber) lo controla el backend.
+ * accountNumber se asigna SOLO cuando un admin aprueba la solicitud.
  */
 export const openMyAccount = async (req, res) => {
     try {
@@ -81,6 +82,7 @@ export const openMyAccount = async (req, res) => {
             user: userId,
             status: false,
             requestStatus: 'PENDING'
+            // accountNumber NO se incluye aquí — se asigna al aprobar
         };
 
         const newRequest = new Account(accountData);
@@ -120,10 +122,10 @@ export const findAccountByNumber = async (req, res) => {
         return res.status(200).json({
             success: true,
             data: {
-                _id:           account._id,
+                _id: account._id,
                 accountNumber: account.accountNumber,
-                accountType:   account.accountType,
-                currency:      account.currency,
+                accountType: account.accountType,
+                currency: account.currency,
             }
         });
     } catch (error) {
