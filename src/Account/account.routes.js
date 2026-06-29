@@ -26,7 +26,7 @@ router.get('/', getMyAccounts);
 router.get('/:id', validateGetMyAccountDetails, getMyAccountDetails);
 
 /**
- * Abrir una nueva cuenta bancaria
+ * Solicitar la apertura de una nueva cuenta bancaria
  * POST /api/client/accounts
  */
 router.post('/', validateOpenMyAccount, openMyAccount);

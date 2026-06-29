@@ -5,8 +5,8 @@ import { Schema, model } from "mongoose";
 const accountSchema = Schema({
     accountNumber: {
         type: String,
-        required: [true, "El número de cuenta es obligatorio"],
         unique: true,
+        sparse: true,
         trim: true
     },
     accountType: {
@@ -34,12 +34,36 @@ const accountSchema = Schema({
     },
     status: {
         type: Boolean,
-        default: true
+        default: false
     },
     bank: {
         type: String,
         enum: ['Banco Kinal', 'Banco Industrial', 'Banrural', 'BAC', 'G&T Continental', 'Promerica'],
         default: 'Banco Kinal'
+    },
+
+    requestStatus: {
+        type: String,
+        enum: {
+            values: ['PENDING', 'APPROVED', 'REJECTED'],
+            message: "Estado de solicitud no válido"
+        },
+        default: 'PENDING'
+    },
+    requestedAt: {
+        type: Date,
+        default: Date.now
+    },
+    reviewedAt: {
+        type: Date
+    },
+    reviewedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    rejectionReason: {
+        type: String,
+        trim: true
     }
 }, {
     timestamps: true,

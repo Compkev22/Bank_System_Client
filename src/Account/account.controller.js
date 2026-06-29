@@ -3,14 +3,13 @@
 import Account from './account.model.js';
 
 /**
- * Obtener todas mis cuentas bancarias
+ * Obtener todas mis cuentas (incluye pendientes, aprobadas, rechazadas)
  * GET /api/client/accounts
  */
 export const getMyAccounts = async (req, res) => {
     try {
         const userId = req.user.id;
 
-        // Solo buscar cuentas que pertenezcan al usuario logueado
         const accounts = await Account.find({ user: userId }).sort({ createdAt: -1 });
 
         return res.status(200).json({
@@ -38,7 +37,6 @@ export const getMyAccountDetails = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Cuenta no encontrada' });
         }
 
-        // 🛑 Filtro de seguridad crítico: Verificar propiedad
         if (account.user.toString() !== userId.toString()) {
             return res.status(403).json({ success: false, message: 'Acceso denegado: Esta cuenta no te pertenece' });
         }
@@ -50,42 +48,62 @@ export const getMyAccountDetails = async (req, res) => {
 };
 
 /**
- * Solicitar/Crear una nueva cuenta bancaria para sí mismo
+ * Solicitar la apertura de una nueva cuenta bancaria
  * POST /api/client/accounts
+ *
+ * El usuario elige accountType, currency y bank.
+ * Todo lo demás (balance, status, requestStatus, accountNumber) lo controla el backend.
  */
 export const openMyAccount = async (req, res) => {
     try {
-        const { accountType } = req.body;
+        const { accountType, currency, bank } = req.body;
         const userId = req.user.id;
 
-        // Generar un número de cuenta único de 10 dígitos
-        let isUnique = false;
-        let generatedNumber = '';
-        while (!isUnique) {
-            generatedNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
-            const existingAccount = await Account.findOne({ accountNumber: generatedNumber });
-            if (!existingAccount) isUnique = true;
+        const existingPending = await Account.findOne({
+            user: userId,
+            accountType: accountType || 'AHORRO',
+            bank: bank || 'Banco Kinal',
+            requestStatus: 'PENDING'
+        });
+
+        if (existingPending) {
+            return res.status(409).json({
+                success: false,
+                message: 'Ya tienes una solicitud pendiente para este tipo de cuenta en ese banco'
+            });
         }
 
-        // Estructura blindada: El cliente no puede enviar su propio balance ni cambiar el status inicial
         const accountData = {
-            accountNumber: generatedNumber,
             accountType: accountType || 'AHORRO',
-            balance: 0, // 🛑 Siempre inicia en 0 para el cliente
+            currency: currency || 'GTQ',
+            bank: bank || 'Banco Kinal',
+            balance: 0,
             user: userId,
-            status: true // Asumiendo que tu modelo usa un booleano para el estado
+            status: false,
+            requestStatus: 'PENDING'
         };
 
-        const newAccount = new Account(accountData);
-        await newAccount.save();
+        const newRequest = new Account(accountData);
+        await newRequest.save();
 
         return res.status(201).json({
             success: true,
-            message: 'Tu nueva cuenta bancaria ha sido aperturada exitosamente',
-            data: newAccount
+            message: 'Tu solicitud de apertura de cuenta fue enviada y está pendiente de aprobación',
+            data: newRequest
         });
 
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Error interno al procesar la apertura de cuenta', error: error.message });
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                success: false,
+                message: 'Datos de solicitud inválidos',
+                error: error.message
+            });
+        }
+        return res.status(500).json({
+            success: false,
+            message: 'Error interno al procesar la solicitud',
+            error: error.message
+        });
     }
 };
