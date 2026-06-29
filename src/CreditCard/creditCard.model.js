@@ -13,11 +13,6 @@ const creditCardSchema = new Schema({
         ref: 'User',
         required: true
     },
-    account: {
-        type: Schema.Types.ObjectId,
-        ref: 'Account',
-        required: false
-    },
     type: {
         type: String,
         enum: ['CLASSIC', 'GOLD', 'PLATINUM', 'BLACK'],
@@ -49,10 +44,14 @@ const creditCardSchema = new Schema({
         type: Number,
         default: 2.5 // Porcentaje mensual
     },
+    pendingStatusRequest: {
+        type: Boolean,
+        default: false
+    },
     status: {
         type: String,
-        enum: ['PENDING', 'ACTIVE', 'BLOCKED', 'CANCELLED'],
-        default: 'PENDING'
+        enum: ['ACTIVE', 'BLOCKED', 'CANCELLED'],
+        default: 'ACTIVE'
     }
 }, {
     timestamps: true,

@@ -1,2 +1,4 @@
+allowBuilds:
+  bcrypt: false
 onlyBuiltDependencies:
   - core-js

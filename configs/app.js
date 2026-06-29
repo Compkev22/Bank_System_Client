@@ -28,9 +28,13 @@ import creditCardPaymentRoutes from '../src/CreditCardPayment/creditCardPayment.
 import extraFinancingRoutes from '../src/ExtraFinancing/extraFinancing.routes.js';
 import extraFinancingDetailRoutes from '../src/ExtraFinancingDetail/extraFinancingDetail.routes.js';
 import extraFinancingPaymentRoutes from '../src/ExtraFinancingPayment/extraFinancingPaymet.routes.js';
-import loanDetailRoutes from '../src/LoanDetail/loanDetail.routes.js';
+import loanDetailRoutes from '../src/LoanDetail/LoanDetail.routes.js';
 import productRoutes from '../src/Product/product.routes.js';
 import favoriteRoutes from '../src/Favorite/favorite.routes.js'
+import cardStatusRequestRoutes from '../src/CardStatusRequest/cardStatusRequest.routes.js';
+import cardRequestRoutes from '../src/cardRequest/cardRequest.routes.js';
+import creditCardRequestRoutes from '../src/creditCardRequest/creditCardRequest.routes.js';
+import extraFinancingRequestRoutes from '../src/ExtraFinancingRequest/extraFinancingRequest.routes.js';
 
 const middleware = (app) => {
     app.use(helmet(helmetConfiguration)); // Configuramos Helmet
@@ -65,6 +69,10 @@ const routes = (app) => {
     app.use(`${BASE_URL}/loanDetails`, loanDetailRoutes);
     app.use(`${BASE_URL}/favorites`, favoriteRoutes);
     app.use(`${BASE_URL}/products`, productRoutes);
+    app.use(`${BASE_URL}/cardStatusRequests`, cardStatusRequestRoutes);
+    app.use(`${BASE_URL}/cardRequests`, cardRequestRoutes);
+    app.use(`${BASE_URL}/creditCardRequests`, creditCardRequestRoutes);
+    app.use(`${BASE_URL}/extraFinancingRequests`, extraFinancingRequestRoutes);
 }
 
 

@@ -1,10 +1,9 @@
 'use strict';
-
 import mongoose from 'mongoose';
 
 const cardSchema = new mongoose.Schema({
-    cardNumber: { 
-        type: String, 
+    cardNumber: {
+        type: String,
         required: [true, 'El número de tarjeta es obligatorio'],
         unique: true,
         trim: true,
@@ -17,7 +16,7 @@ const cardSchema = new mongoose.Schema({
         uppercase: true
     },
     expirationDate: {
-        type: String, // Formato MM/YY
+        type: String,
         required: [true, 'La fecha de expiración es obligatoria'],
         trim: true
     },
@@ -37,6 +36,10 @@ const cardSchema = new mongoose.Schema({
         enum: ['VISA', 'MASTERCARD', 'AMEX'],
         required: true
     },
+    pendingStatusRequest: {
+        type: Boolean,
+        default: false
+    },
     creditLimit: {
         type: Number,
         default: 0,
@@ -47,25 +50,23 @@ const cardSchema = new mongoose.Schema({
         default: 0,
         min: [0, 'El monto consumido no puede ser negativo']
     },
-    image: { 
+    image: {
         type: String,
-        default: 'cards/default_card' 
+        default: 'cards/default_card'
     },
     isActive: {
         type: Boolean,
-        default: true
+        default: false      // ← siempre inicia inactiva; el admin la activa al aprobar
     },
-    
     isApproved: {
         type: Boolean,
-        default: false 
+        default: false
     },
     account: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Account',
         required: [true, 'La tarjeta debe estar asociada a una cuenta bancaria']
     },
-
 }, {
     timestamps: true,
     versionKey: false

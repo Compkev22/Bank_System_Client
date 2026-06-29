@@ -1,17 +1,17 @@
+'use strict';
 import { Router } from 'express';
-import { getMyFinancings, requestExtraFinancing } from './extraFinancing.controller.js';
+import { getMyFinancings, getMyFinancingsByCard } from './extraFinancing.controller.js';
 import { validateJWT } from '../../middlewares/validate-jwt.js';
 import { hasRole } from '../../middlewares/role-validator.js';
-import { validateRequestExtraFinancing } from '../../middlewares/extraFinancing-validator.js';
 
 const router = Router();
 
 router.use(validateJWT, hasRole('USER_ROLE'));
 
-// GET /client/extra-financings
+// GET /bankSystem/v1/extraFinancings
 router.get('/', getMyFinancings);
 
-// POST /client/extra-financings
-router.post('/', validateRequestExtraFinancing, requestExtraFinancing);
+// GET /bankSystem/v1/extraFinancings/card/:creditCardId
+router.get('/card/:creditCardId', getMyFinancingsByCard);
 
 export default router;

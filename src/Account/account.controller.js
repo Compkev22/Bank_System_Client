@@ -107,3 +107,26 @@ export const openMyAccount = async (req, res) => {
         });
     }
 };
+
+export const findAccountByNumber = async (req, res) => {
+    try {
+        const { accountNumber } = req.query;
+        if (!accountNumber) return res.status(400).json({ success: false, message: 'Número de cuenta requerido' });
+
+        const account = await Account.findOne({ accountNumber, status: true });
+        if (!account) return res.status(404).json({ success: false, message: 'Cuenta no encontrada o inactiva' });
+
+        // Solo exponemos los datos públicos necesarios
+        return res.status(200).json({
+            success: true,
+            data: {
+                _id:           account._id,
+                accountNumber: account.accountNumber,
+                accountType:   account.accountType,
+                currency:      account.currency,
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Error al buscar la cuenta', error: error.message });
+    }
+};
